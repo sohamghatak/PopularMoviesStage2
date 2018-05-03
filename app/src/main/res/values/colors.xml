@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#B71C1C</color>
+    <color name="colorPrimaryDark">#8C2B16</color>
+    <color name="colorAccent">#FAFAFA</color>
+    <!--Background color of activity-->
+    <color name="activityBackgroundColor">#424242</color>
+    <!--Release date static text color-->
+    <color name="releaseStaticTextColor">#0091EA</color>
+    <!--Rating static text color-->
+    <color name="ratingStaticTextColor">#76FF03</color>
+    <!--Reviews Title static text color-->
+    <color name="reviewsShownTitleColor">#558B2F</color>
+    <color name="reviewsHiddenTitleColor">#039BE5</color>
+</resources>

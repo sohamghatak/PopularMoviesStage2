@@ -1,0 +1,66 @@
+<resources>
+    <!--App title-->
+    <string name="app_name">Popular Movies</string>
+    <!--Movie Details activity name-->
+    <string name="app_details_activity">Movie Details</string>
+    <!--Dummy movie title-->
+    <string name="movie_title">Movie Title</string>
+    <!--Menu Now playing title-->
+    <string name="menu_now_playing">Now playing</string>
+    <!--Menu High rated title-->
+    <string name="menu_high_rated">High rated</string>
+    <!--Menu Most popular title title-->
+    <string name="menu_most_popular">Most popular</string>
+    <!--Menu refresh-->
+    <string name="menu_refresh">Refresh</string>
+    <!--Menu refresh-->
+    <string name="menu_favorites">Favorites</string>
+    <!--Dummy movie date-->
+    <string name="movie_date">01–01–2000</string>
+    <!--Dummy content description string-->
+    <string name="movie_poster">Movie poster</string>
+    <!--Dummy movie rating-->
+    <string name="movie_rating">10.0</string>
+    <!--Dummy movie rating-->
+    <string name="out_of_rating">/10</string>
+    <!--Dummy movie plot-->
+    <string name="movie_plot">This is movie plot.</string>
+    <!--Dummy movie plot-->
+    <string name="movie_reviews">This is movie reviews.</string>
+    <!--Error Message unable to load movies-->
+    <string name="error_message">Unable to load movies. Please tap the refresh icon at the top menu bar to refresh.</string>
+    <!--Error Message unable to load movies-->
+    <string name="error_no_fav_no_internet">There is no internet connection and you have not selected any favorite movie. Please turn on the internet and select a few favorite movies.</string>
+    <!--Error Message unable to load movies-->
+    <string name="error_no_fav_active_internet">You have no favorite movies selected. Select a few favorite movies by clicking the refresh button at top and try again.</string>
+    <!--Error Message no internet connection-->
+    <string name="error_message_no_internet">There is no internet connection. Please switch on internet connection and try refreshing again.</string>
+    <!--Static Release Date text-->
+    <string name="showing_reviews_text">Showing reviews below</string>
+    <!--Static Release Date text-->
+    <string name="static_release_date_text">Release Date</string>
+    <!--Static Rating text-->
+    <string name="static_rating_text">Rating</string>
+    <!--Extra text to be put in Intent-->
+    <string name="intent_movies">Movies</string>
+    <!--Extra text to be put in Intent-->
+    <string name="removed_from_favorites">Movie removed from your favorite list</string>
+    <!--Extra text to be put in Intent-->
+    <string name="added_to_favorites">Movie added succesfully to your favorite list</string>
+    <!--Movie plot read more static text-->
+    <string name="movie_plot_read_more_text">Read more</string>
+    <!--Movie plot read less static text-->
+    <string name="movie_plot_read_less_text">Read less</string>
+    <!--Youtube URL open with-->
+    <string name="trailer_url_open_with">Open with</string>
+    <!--Youtube URL open with-->
+    <string name="cannot_show_reviews">As there is no internet connection reviews cannot be shown.</string>
+    <!--Favorites button static text-->
+    <string name="favorite_button_text">Favorite</string>
+    <!--Trailer button static text-->
+    <string name="trailer_button_text">Watch Trailer</string>
+    <!--Reviews static title text-->
+    <string name="reviews_title_text">Click here to  read reviews about this movie</string>
+    <!--Show only favorite movies-->
+    <string name="show_only_favorites">No Internet connection. Only showing favorite movies</string>
+</resources>

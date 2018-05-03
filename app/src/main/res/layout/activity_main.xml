@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/coordinator_layout"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.soham.popularmoviesstage2.MainActivity">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/pm_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@mipmap/ic_launcher" />
+
+    <TextView
+        android:id="@+id/pm_error_message"
+        style="@style/ErrorMessageStyle"
+        android:textAlignment="center" />
+
+    <ProgressBar
+        android:id="@+id/pm_loading_indicator"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_gravity="center" />
+
+</android.support.design.widget.CoordinatorLayout>

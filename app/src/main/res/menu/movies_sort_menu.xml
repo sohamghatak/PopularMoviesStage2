@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/now_playing_settings"
+        android:orderInCategory="1"
+        android:title="@string/menu_now_playing" />
+    <item
+        android:id="@+id/most_popular_settings"
+        android:orderInCategory="2"
+        android:title="@string/menu_most_popular" />
+    <item
+        android:id="@+id/high_rated_settings"
+        android:orderInCategory="3"
+        android:title="@string/menu_high_rated" />
+    <item
+        android:id="@+id/refresh"
+        android:icon="@drawable/ic_refresh_white_24dp"
+        android:title="@string/menu_refresh"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/favorites"
+        android:orderInCategory="4"
+        android:title="@string/menu_favorites" />
+
+</menu>
