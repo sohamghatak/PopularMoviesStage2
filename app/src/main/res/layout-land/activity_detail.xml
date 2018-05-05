@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/detail_scroll_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         tools:context="com.example.soham.popularmovies.MainActivity">
 
         <ImageView
@@ -18,6 +19,7 @@
         <TextView
             android:id="@+id/pm_movie_title"
             style="@style/TextViewStyle"
+            android:layout_toEndOf="@+id/pm_image_poster"
             android:layout_toRightOf="@+id/pm_image_poster"
             android:textStyle="bold"
             tools:text="@string/movie_title" />
@@ -25,6 +27,7 @@
         <TextView
             style="@style/StaticMovieDetailText"
             android:layout_below="@+id/pm_movie_title"
+            android:layout_toEndOf="@id/pm_image_poster"
             android:layout_toRightOf="@id/pm_image_poster"
             android:text="@string/static_release_date_text"
             android:textColor="@color/releaseStaticTextColor" />
@@ -34,12 +37,14 @@
             android:id="@+id/pm_release_date"
             style="@style/TextViewStyle"
             android:layout_below="@+id/pm_movie_title"
+            android:layout_toEndOf="@+id/pm_image_poster"
             android:layout_toRightOf="@+id/pm_image_poster"
             tools:text="@string/movie_date" />
 
         <TextView
             style="@style/StaticMovieDetailText"
             android:layout_below="@+id/pm_release_date"
+            android:layout_toEndOf="@id/pm_image_poster"
             android:layout_toRightOf="@id/pm_image_poster"
             android:text="@string/static_rating_text"
             android:textColor="@color/ratingStaticTextColor" />
@@ -48,6 +53,7 @@
             android:id="@+id/pm_movie_rating"
             style="@style/TextViewStyle"
             android:layout_below="@+id/pm_release_date"
+            android:layout_toEndOf="@+id/pm_image_poster"
             android:layout_toRightOf="@+id/pm_image_poster"
             tools:text="@string/movie_rating" />
 
@@ -55,6 +61,7 @@
             android:id="@+id/pm_out_of_rating"
             style="@style/OutOfRatingStyle"
             android:layout_below="@+id/pm_release_date"
+            android:layout_toEndOf="@+id/pm_movie_rating"
             android:layout_toRightOf="@+id/pm_movie_rating"
             android:text="@string/out_of_rating" />
 
@@ -74,14 +81,17 @@
             android:id="@+id/pm_fav_button"
             style="@style/FavoriteButtonStyle"
             android:layout_below="@+id/pm_movie_rating"
+            android:layout_toEndOf="@+id/pm_image_poster"
             android:layout_toRightOf="@+id/pm_image_poster"
             android:drawableLeft="@drawable/ic_favorite_border_white_24dp"
+            android:drawableStart="@drawable/ic_favorite_border_white_24dp"
             android:text="@string/favorite_button_text" />
 
         <Button
             android:id="@+id/trailer_button"
             style="@style/TrailerButtonLandStyle"
             android:layout_below="@id/pm_fav_button"
+            android:layout_toEndOf="@+id/pm_image_poster"
             android:layout_toRightOf="@+id/pm_image_poster"
             android:text="@string/trailer_button_text" />
 
@@ -105,7 +115,6 @@
             <TextView
                 android:id="@+id/pm_movie_reviews"
                 style="@style/PlotTextViewStyle"
-                android:layout_below="@+id/pm_reviews_title"
                 tools:text="@string/movie_reviews" />
         </FrameLayout>
     </RelativeLayout>

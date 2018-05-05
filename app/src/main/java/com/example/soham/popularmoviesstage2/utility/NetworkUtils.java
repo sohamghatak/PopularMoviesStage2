@@ -14,6 +14,7 @@ import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 //Network utilities class
 public final class NetworkUtils {
@@ -142,8 +143,9 @@ public final class NetworkUtils {
     public static String simpleDate(String date) {
         Date parsedDate = null;
         String desiredDateString;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
-        SimpleDateFormat desiredDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+        SimpleDateFormat dateFormat;
+        dateFormat = new SimpleDateFormat("yyyy-mm-dd", Locale.US);
+        SimpleDateFormat desiredDateFormat = new SimpleDateFormat("dd-MMM-yyyy", Locale.US);
         try {
             parsedDate = dateFormat.parse(date);
         } catch (ParseException e) {

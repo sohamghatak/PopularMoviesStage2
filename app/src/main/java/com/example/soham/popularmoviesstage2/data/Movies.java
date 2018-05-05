@@ -9,20 +9,22 @@ import android.os.Parcelable;
  **/
 public final class Movies implements Parcelable {
 
-    private int mMovieId;
+    private final int mMovieId;
     private final Double mRating;
     private final String mTitle;
     private final String mPoster;
     private final String mPlot;
     private final String mDate;
+    private final int mFavorite;
 
-    public Movies(int id, double rating, String title, String poster, String plot, String date) {
+    public Movies(int id, double rating, String title, String poster, String plot, String date, int favorite) {
         mMovieId = id;
         mRating = rating;
         mTitle = title;
         mPoster = poster;
         mPlot = plot;
         mDate = date;
+        mFavorite = favorite;
     }
 
     /**
@@ -30,13 +32,14 @@ public final class Movies implements Parcelable {
      *
      * @param in Parcel object
      **/
-    protected Movies(Parcel in) {
+    private Movies(Parcel in) {
         this.mMovieId = in.readInt();
         this.mRating = (Double) in.readValue(Double.class.getClassLoader());
         this.mTitle = in.readString();
         this.mPoster = in.readString();
         this.mPlot = in.readString();
         this.mDate = in.readString();
+        this.mFavorite = in.readInt();
     }
 
     @Override
@@ -52,6 +55,7 @@ public final class Movies implements Parcelable {
         dest.writeString(this.mPoster);
         dest.writeString(this.mPlot);
         dest.writeString(this.mDate);
+        dest.writeInt(this.mFavorite);
     }
 
     public static final Parcelable.Creator<Movies> CREATOR = new Parcelable.Creator<Movies>() {
@@ -88,6 +92,10 @@ public final class Movies implements Parcelable {
 
     public String getMoviePoster() {
         return mPoster;
+    }
+
+    public int getFavorite() {
+        return mFavorite;
     }
 }
 

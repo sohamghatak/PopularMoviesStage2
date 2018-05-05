@@ -2,6 +2,7 @@ package com.example.soham.popularmoviesstage2;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,11 +33,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         //Image View to hold movie poster
-        public final ImageView mMoviePoster;
+        final ImageView mMoviePoster;
 
-        public MovieAdapterViewHolder(View view) {
+        MovieAdapterViewHolder(View view) {
             super(view);
-            mMoviePoster = (ImageView) view.findViewById(R.id.pm_movie_poster);
+            mMoviePoster = view.findViewById(R.id.pm_movie_poster);
             view.setOnClickListener(this);
         }
 
@@ -68,8 +69,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
      * @param parent   ViewGroup within which these ViewHolders are contained.
      * @param viewType used to represent different type of item in RecyclerView
      **/
+    @NonNull
     @Override
-    public MovieAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MovieAdapterViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
         int layoutItemId = R.layout.movie_grid_item;
         LayoutInflater layoutInflater = LayoutInflater.from(context);
@@ -87,7 +89,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
      **/
 
     @Override
-    public void onBindViewHolder(MovieAdapterViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MovieAdapterViewHolder holder, int position) {
         Movies movies = mMovies.get(position);
         Uri posterUri = Uri.parse(movies.getMoviePoster());
 

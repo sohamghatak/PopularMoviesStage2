@@ -2,6 +2,7 @@ package com.example.soham.popularmoviesstage2;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -9,6 +10,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.CursorLoader;
@@ -21,10 +23,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.soham.popularmoviesstage2.data.MovieContract;
+import com.example.soham.popularmoviesstage2.data.Movies;
 import com.example.soham.popularmoviesstage2.data.SyncMovieDb;
 import com.example.soham.popularmoviesstage2.utility.MovieJSONUtils;
 import com.example.soham.popularmoviesstage2.utility.NetworkUtils;
@@ -42,19 +46,15 @@ import static com.example.soham.popularmoviesstage2.utility.NetworkUtils.simpleD
 
 public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    //Local variables to hold movie details
-    private String movieTitle;
-    private Double movieRating;
-    private String moviePLot;
-    private String movieReleaseDate;
-    private String moviePoster;
-    private int movieId;
     private int mFavorite;
     private Uri receivedMovieUri;
     private String trailerURL = null;
+    private ArrayList<Movies> moviesList = new ArrayList<>();
     //Movie details Cursor loader ID
     private static final int MOVIE_DETAIL_LOADER_ID = 919;
-
+    //Variables to be used while restoring savedInstanceState
+    private String reviewsString = "";
+    private Boolean reviewShown = false;
 
     //Using ButterKnife to bind views
     @BindView(R.id.pm_movie_title)
@@ -79,6 +79,8 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     TextView mReadMore;
     @BindView(R.id.loading_reviews)
     ProgressBar mLoadingReviews;
+    @BindView(R.id.detail_scroll_view)
+    ScrollView mDetailScrollView;
 
     //Columns that needs to be selected from the database
     private static final String[] MOVIE_PROJECTION = {
@@ -106,6 +108,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         ButterKnife.bind(this);
 
         mMovieReviews.setVisibility(View.GONE);
+        reviewShown = false;
         mReviewsTitle.setVisibility(View.VISIBLE);
         mLoadingReviews.setVisibility(View.GONE);
         final Intent receivedMovieIntent = getIntent();
@@ -117,10 +120,15 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         }
         //Get the movie id for use in building trailer URI and reviews URI
         final String movieId = receivedMovieUri.getLastPathSegment();
-        //Initialize the loader
-        getSupportLoaderManager().initLoader(MOVIE_DETAIL_LOADER_ID, null, this).forceLoad();
+
         //Execute async task to fetch movie trailer
         new FetchMovieTrailerAsyncTask().execute(movieId);
+
+        if (savedInstanceState == null) {
+            //Initialize the loader
+            getSupportLoaderManager().initLoader(MOVIE_DETAIL_LOADER_ID, null, this).forceLoad();
+        }
+
         //Favorite button on click listener
         mFavButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,7 +136,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 //Using drawable to set rounded edge background
                 mFavButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.favorite_clicked));
                 //Update the database with the new favorite value as selected by the user
-                new UpdateFavortiesAsyncTask().execute();
+                new UpdateFavoritesesAsyncTask().execute();
             }
         });
         //Trailer button onClickListener to launch first trailer of the movie on youtube
@@ -150,11 +158,13 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 //If reviews are already shown the and the user click on the movie review expandable text view again,
                 // hide the reviews
                 if (mMovieReviews.isShown()) {
+                    reviewShown = false;
                     mReviewsTitle.setText(R.string.reviews_title_text);
                     mMovieReviews.setVisibility(View.GONE);
                     mReviewsTitle.setTextColor(getResources().getColor(R.color.reviewsHiddenTitleColor));
                     //else if the reviews are not shown then fetch the reviews through async task
                 } else {
+                    reviewShown = true;
                     mReviewsTitle.setTextColor(getResources().getColor(R.color.reviewsShownTitleColor));
                     mReviewsTitle.setText(R.string.showing_reviews_text);
                     mLoadingReviews.setVisibility(View.VISIBLE);
@@ -196,7 +206,44 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //Save the moviesList in outState bundle
+        outState.putParcelableArrayList("detailMoviesList", moviesList);
+        //Save the scroll position of the movie detail view
+        outState.putIntArray("SCROLL_POSITION",
+                new int[]{mDetailScrollView.getScrollX(), mDetailScrollView.getScrollY()});
+        //Save the movie review in outState bundle
+        outState.putString("movieReviews", reviewsString);
+        //Save the review shown text view state in outState bundle
+        outState.putBoolean("reviewShown", reviewShown);
+    }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        //Restore moviesList
+        moviesList = savedInstanceState.getParcelableArrayList("detailMoviesList");
+        //Restore movie review
+        reviewsString = savedInstanceState.getString("movieReviews");
+        //Restore review text view state
+        reviewShown = savedInstanceState.getBoolean("reviewShown");
+        //Load saved data onto views
+        showSavedData(moviesList, reviewsString);
+        //Restore scroll view position
+        final int[] position = savedInstanceState.getIntArray("SCROLL_POSITION");
+        if (position != null)
+            //post method cannot run on main thread
+            mDetailScrollView.post(new Runnable() {
+                public void run() {
+                    //Scroll to saved position
+                    mDetailScrollView.scrollTo(position[0], position[1]);
+                }
+            });
+    }
+
+    @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
@@ -215,7 +262,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
 
         boolean cursorHasValidData = false;
         if (data != null && data.moveToFirst()) {
@@ -228,44 +275,23 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             return;
         }
 
-        movieId = data.getInt(INDEX_COLUMN_MOVIE_ID);
-        movieTitle = data.getString(INDEX_COLUMN_MOVIE_TITLE);
-        moviePLot = data.getString(INDEX_COLUMN_MOVIE_PLOT);
-        movieRating = data.getDouble(INDEX_COLUMN_MOVIE_RATING);
-        movieReleaseDate = data.getString(INDEX_COLUMN_MOVIE_RELEASE);
+        int movieId = data.getInt(INDEX_COLUMN_MOVIE_ID);
+        String movieTitle = data.getString(INDEX_COLUMN_MOVIE_TITLE);
+        String moviePLot = data.getString(INDEX_COLUMN_MOVIE_PLOT);
+        Double movieRating = data.getDouble(INDEX_COLUMN_MOVIE_RATING);
+        String movieReleaseDate = data.getString(INDEX_COLUMN_MOVIE_RELEASE);
         mFavorite = data.getInt(INDEX_COLUMN_MOVIE_FAVORITE);
-        moviePoster = data.getString(INDEX_COLUMN_MOVIE_POSTER);
-        Uri posterUri = Uri.parse(moviePoster);
-
-        mMovieTitle.setText(movieTitle);
-        mMovieRating.setText(String.valueOf(movieRating));
-        //Check to find the number of words and set the expandable text view if needed
-        int mWords = numberOfWords(moviePLot);
-        if (mWords < 50) {
-            mReadMore.setVisibility(View.GONE);
-        } else {
-            mMoviePlot.setMaxLines(5);
-        }
-        mMoviePlot.setMaxLines(5);
-        mMoviePlot.setText(moviePLot);
-        mReleaseDate.setText(simpleDate(movieReleaseDate));
-        Picasso.with(this)
-                .load(posterUri)
-                .placeholder(R.drawable.ic_movie_white_48dp)
-                .error(R.drawable.ic_error_outline_white_48dp)
-                .into(mMoviePoster);
-        //Set the favorite button color accordingly
-        if (mFavorite > 0) {
-            mFavButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.favorite_clicked));
-        } else {
-            mFavButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.favorite_not_clicked));
-        }
+        String moviePoster = data.getString(INDEX_COLUMN_MOVIE_POSTER);
+        Movies movies = new Movies(movieId, movieRating, movieTitle, moviePoster, moviePLot, movieReleaseDate, mFavorite);
+        moviesList.add(movies);
+        //Call helper method to load data onto views
+        showData(moviesList);
 
     }
 
     //Not implementing onLoaderReset
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
     }
 
     @Override
@@ -287,7 +313,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     //AsyncTask to update favorite details to the database
-    public class UpdateFavortiesAsyncTask extends AsyncTask<Void, Void, Void> {
+    class UpdateFavoritesesAsyncTask extends AsyncTask<Void, Void, Void> {
 
         private int isFavorite = 0;
         private boolean addedSuccessfully = false;
@@ -323,7 +349,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     //AsyncTask to fetch movie trailer
-    public class FetchMovieTrailerAsyncTask extends AsyncTask<String, Void, URL> {
+    class FetchMovieTrailerAsyncTask extends AsyncTask<String, Void, URL> {
 
         @Override
         protected URL doInBackground(String... strings) {
@@ -355,7 +381,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     //AsyncTask to fetch movie reviews
-    public class FetchReviewsAsyncTask extends AsyncTask<String, Void, List<String>> {
+    class FetchReviewsAsyncTask extends AsyncTask<String, Void, List<String>> {
 
         List<String> movieReviews = new ArrayList<>();
 
@@ -387,9 +413,11 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                             .append(System.getProperty("line.separator"));
 
                 }
+                reviewsString = reviewsBuffer.toString();
                 mMovieReviews.setText(reviewsBuffer);
                 mMovieReviews.setVisibility(View.VISIBLE);
             } else {
+                reviewsString = reviews;
                 mMovieReviews.setText(reviews);
                 mMovieReviews.setVisibility(View.VISIBLE);
             }
@@ -405,14 +433,16 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 .setType("text/plain")
                 .setText(trailerURL)
                 .getIntent();
-        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        }
         return shareIntent;
     }
 
     /**
      * Helper method to check if internet connection is active on the device.
      **/
-    public final boolean checkConnection() {
+    private boolean checkConnection() {
 
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = null;
@@ -437,5 +467,92 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             }
         }
         return count;
+    }
+
+    /**
+     * Helper method to show movies data when it is loaded the first time
+     *
+     * @param moviesData List of movies passed in
+     **/
+    private void showData(ArrayList<Movies> moviesData) {
+
+        for (int i = 0; i < moviesData.size(); i++) {
+            Movies singleMovie = moviesData.get(i);
+            Uri posterUri = Uri.parse(singleMovie.getMoviePoster());
+
+            mMovieTitle.setText(singleMovie.getMovieTitle());
+            mMovieRating.setText(String.valueOf(singleMovie.getMovieRating()));
+            //Check to find the number of words and set the expandable text view if needed
+            int mWords = numberOfWords(singleMovie.getMoviePlot());
+            if (mWords < 50) {
+                mReadMore.setVisibility(View.GONE);
+            } else {
+                mMoviePlot.setMaxLines(5);
+            }
+            mMoviePlot.setText(singleMovie.getMoviePlot());
+            mReleaseDate.setText(simpleDate(singleMovie.getReleaseDate()));
+            Picasso.with(this)
+                    .load(posterUri)
+                    .placeholder(R.drawable.ic_movie_white_48dp)
+                    .error(R.drawable.ic_error_outline_white_48dp)
+                    .into(mMoviePoster);
+            //Set the favorite button color accordingly
+            if (singleMovie.getFavorite() > 0) {
+                mFavButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.favorite_clicked));
+            } else {
+                mFavButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.favorite_not_clicked));
+            }
+        }
+    }
+
+    /**
+     * Helper method to show movies data when it is loaded from saved instance state
+     *
+     * @param moviesData  List of movies passed in
+     * @param movieReview movie review string value
+     **/
+    private void showSavedData(ArrayList<Movies> moviesData, String movieReview) {
+        //Check the orientation of the device
+        final int orientation = getResources().getConfiguration().orientation;
+        for (int i = 0; i < moviesData.size(); i++) {
+            Movies singleMovie = moviesData.get(i);
+            Uri posterUri = Uri.parse(singleMovie.getMoviePoster());
+
+            mMovieTitle.setText(singleMovie.getMovieTitle());
+            mMovieRating.setText(String.valueOf(singleMovie.getMovieRating()));
+            //Check to find the number of words and set the expandable text view if needed
+            int mWords = numberOfWords(singleMovie.getMoviePlot());
+            //If orientation is landscape remove read more test view
+            getResources().getConfiguration();
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                mReadMore.setVisibility(View.GONE);
+            } else {
+                if (mWords < 50) {
+                    mReadMore.setVisibility(View.GONE);
+                } else {
+                    mMoviePlot.setMaxLines(5);
+                }
+            }
+            //Set the reviews title if reviews are shown
+            if (reviewShown) {
+                mReviewsTitle.setTextColor(getResources().getColor(R.color.reviewsShownTitleColor));
+                mReviewsTitle.setText(R.string.showing_reviews_text);
+                mMovieReviews.setVisibility(View.VISIBLE);
+                mMovieReviews.setText(movieReview);
+            }
+            mMoviePlot.setText(singleMovie.getMoviePlot());
+            mReleaseDate.setText(simpleDate(singleMovie.getReleaseDate()));
+            Picasso.with(this)
+                    .load(posterUri)
+                    .placeholder(R.drawable.ic_movie_white_48dp)
+                    .error(R.drawable.ic_error_outline_white_48dp)
+                    .into(mMoviePoster);
+            //Set the favorite button color accordingly
+            if (singleMovie.getFavorite() > 0) {
+                mFavButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.favorite_clicked));
+            } else {
+                mFavButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.favorite_not_clicked));
+            }
+        }
     }
 }

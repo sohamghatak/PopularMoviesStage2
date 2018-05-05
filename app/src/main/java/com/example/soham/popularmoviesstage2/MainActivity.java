@@ -10,6 +10,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -19,6 +20,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,8 +56,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     //private RecyclerView mRecyclerView;
     private MovieAdapter mMovieAdapter;
-    //Local variable to store the menu item id clicked
-    private int itemId;
     private boolean connection;
     //Using ButterKnife to bind views
     @BindView(R.id.pm_recycler_view)
@@ -65,18 +65,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     @BindView(R.id.pm_loading_indicator)
     ProgressBar mLoadingIndicator;
 
-    private String movieTitle;
-    private Double movieRating;
-    private String moviePLot;
-    private String movieReleaseDate;
-    private String moviePoster;
-    private int movieId;
-    private int mFavorite;
     //Variable to store the id of the menu option that was clicked by the user
-    public static int SELECTED_CODE = 0;
-    Movies movies;
+    private static int SELECTED_CODE = 0;
     //Array List to store the movies object.
-    List<Movies> mMoviesList = new ArrayList<>();
+    private List<Movies> mMoviesList = new ArrayList<>();
     //Favorite movie loader id
     private static final int FAVORITE_MOVIE_LOADER_ID = 934;
 
@@ -88,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         mLoadingIndicator.setVisibility(View.VISIBLE);
         //GridLayoutManager to populate a grid layout
         GridLayoutManager gridLayoutManager = new GridLayoutManager
-                (this, getColumnSpan());
+                (this, numberOfColumns());
         mRecyclerView.setLayoutManager(gridLayoutManager);
         mRecyclerView.setHasFixedSize(true);
 
@@ -98,17 +90,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         //Below condition checks the saved instance state
         if (savedInstanceState == null) {
             nowPlayingMovies();
-        } else {
-            mLoadingIndicator.setVisibility(View.GONE);
-            getUserSettings(savedInstanceState.getInt("selectedOption", R.id.now_playing_settings));
         }
-
     }
 
     @Override
     protected void onResume() {
-        /**Added logic to navigate back to the right activity
-         * when the user presses back button in action bar**/
         switch (SELECTED_CODE) {
             case R.id.favorites:
                 mMoviesList.clear();
@@ -133,8 +119,17 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
      **/
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putParcelableArrayList("movieList", (ArrayList<? extends Parcelable>) mMoviesList);
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putInt("selectedOption", itemId);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mLoadingIndicator.setVisibility(View.GONE);
+        mMoviesList = savedInstanceState.getParcelableArrayList("movieList");
+        //Restore the movies list from savedInstanceState
+        mMovieAdapter.addListMovies(mMoviesList);
     }
 
     @Override
@@ -182,14 +177,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         if (data != null) {
             try {
                 while (data.moveToNext()) {
-                    movieId = data.getInt(INDEX_COLUMN_MOVIE_ID);
-                    movieTitle = data.getString(INDEX_COLUMN_MOVIE_TITLE);
-                    moviePLot = data.getString(INDEX_COLUMN_MOVIE_PLOT);
-                    movieRating = data.getDouble(INDEX_COLUMN_MOVIE_RATING);
-                    movieReleaseDate = data.getString(INDEX_COLUMN_MOVIE_RELEASE);
-                    mFavorite = data.getInt(INDEX_COLUMN_MOVIE_FAVORITE);
-                    moviePoster = data.getString(INDEX_COLUMN_MOVIE_POSTER);
-                    movies = new Movies(movieId, movieRating, movieTitle, moviePoster, moviePLot, movieReleaseDate);
+                    int movieId = data.getInt(INDEX_COLUMN_MOVIE_ID);
+                    String movieTitle = data.getString(INDEX_COLUMN_MOVIE_TITLE);
+                    String moviePLot = data.getString(INDEX_COLUMN_MOVIE_PLOT);
+                    Double movieRating = data.getDouble(INDEX_COLUMN_MOVIE_RATING);
+                    String movieReleaseDate = data.getString(INDEX_COLUMN_MOVIE_RELEASE);
+                    int mFavorite = data.getInt(INDEX_COLUMN_MOVIE_FAVORITE);
+                    String moviePoster = data.getString(INDEX_COLUMN_MOVIE_POSTER);
+                    Movies movies = new Movies(movieId, movieRating, movieTitle, moviePoster, moviePLot, movieReleaseDate, mFavorite);
                     mMoviesList.add(movies);
                 }
                 mMovieAdapter.addListMovies(mMoviesList);
@@ -215,7 +210,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                     mLoadingIndicator.setVisibility(View.GONE);
                     mErrorMessage.setText(R.string.error_no_fav_active_internet);
                     showErrorMessage();
-                    return;
                 }
             } finally {
                 //Destroy loader as it was being called twice
@@ -223,11 +217,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 //close the cursor
                 data.close();
             }
-        } else {
-            //return if data is null
-            return;
         }
-
     }
 
     //Not implementing loader reset method
@@ -239,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
      * AsyncTask class to handle network operation in background thread
      **/
     @SuppressLint("StaticFieldLeak")
-    public class FetchMoviesTask extends AsyncTask<String, Void, List<Movies>> {
+    class FetchMoviesTask extends AsyncTask<String, Void, List<Movies>> {
 
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
@@ -252,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         @Override
         protected List<Movies> doInBackground(String... strings) {
             String response = null;
-            List<Movies> mMoviesList;
+
             URL url = NetworkUtils.buildURL(strings[0]);
             try {
                 response = NetworkUtils.getHTTPResponse(url);
@@ -363,8 +353,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
      * Method to execute task based on User clicked menu options.
      **/
     private void getUserSettings(int selectedSetting) {
-        itemId = selectedSetting;
-        switch (itemId) {
+        switch (selectedSetting) {
             case R.id.now_playing_settings:
                 nowPlayingMovies();
                 break;
@@ -403,17 +392,26 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     /**
      * This method returns the number of columns based on the screen orientation.
      **/
-    private int getColumnSpan() {
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            return 4;
+    private int numberOfColumns() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int widthDivider = 600;
+        final int orientation = getResources().getConfiguration().orientation;
+        //Change width divider based on screen orientation
+        getResources().getConfiguration();
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            widthDivider = 550;
         }
-        return 2;
+        int width = displayMetrics.widthPixels;
+        int nColumns = width / widthDivider;
+        if (nColumns < 2) return 2; //to keep the grid aspect
+        return nColumns;
     }
 
     /**
      * Helper method to check if internet connection is active on the device.
      **/
-    public final boolean checkConnection() {
+    private boolean checkConnection() {
 
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = null;

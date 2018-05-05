@@ -39,7 +39,8 @@ public final class MovieJSONUtils {
         Movies movies;
         //Array List to store the movies object.
         List<Movies> mMoviesList = new ArrayList<>();
-
+        //Default int for favorite movie
+        final int favorite = 0;
         //Return early if the jsonResponse is empty
         if (TextUtils.isEmpty(jsonResponse)) {
             return null;
@@ -56,7 +57,7 @@ public final class MovieJSONUtils {
                 String poster = MOVIES_POSTER_URL + receivePosterPath;
                 String plot = movieDetailsObject.getString(OVERVIEW);
                 String releaseDate = movieDetailsObject.getString(RELEASE_DATE);
-                movies = new Movies(movieId, userRating, originalTitle, poster, plot, releaseDate);
+                movies = new Movies(movieId, userRating, originalTitle, poster, plot, releaseDate, favorite);
                 mMoviesList.add(movies);
             }
         } catch (JSONException e) {

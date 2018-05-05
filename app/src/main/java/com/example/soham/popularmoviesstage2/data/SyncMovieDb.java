@@ -20,7 +20,7 @@ public class SyncMovieDb {
         //Creating a content values array for bulk insert
         ContentValues[] movieValuesArray = new ContentValues[moviesList.size()];
 
-        if (moviesList != null && moviesList.size() != 0) {
+        if (moviesList.size() != 0) {
             for (int i = 0; i < moviesList.size(); i++) {
                 //Get details of a single movie
                 Movies singleMovie = moviesList.get(i);
@@ -35,7 +35,7 @@ public class SyncMovieDb {
                 movieValuesArray[i] = movieValues;
             }
         }
-        if (movieValuesArray != null && movieValuesArray.length != 0) {
+        if (movieValuesArray.length != 0) {
             ContentResolver movieContentResolver = context.getContentResolver();
             //Update database with the values
             movieContentResolver.bulkInsert(MovieContract.MovieEntry.CONTENT_URI, movieValuesArray);
@@ -56,10 +56,6 @@ public class SyncMovieDb {
         movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_FAVORITE, favorite);
         ContentResolver movieContentResolver = context.getContentResolver();
         int rowsUpdated = movieContentResolver.update(receiveUri, movieValues, null, null);
-        if (rowsUpdated > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return rowsUpdated > 0;
     }
 }

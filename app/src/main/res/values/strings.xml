@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!--App title-->
     <string name="app_name">Popular Movies</string>
     <!--Movie Details activity name-->
@@ -34,7 +34,7 @@
     <!--Error Message unable to load movies-->
     <string name="error_no_fav_active_internet">You have no favorite movies selected. Select a few favorite movies by clicking the refresh button at top and try again.</string>
     <!--Error Message no internet connection-->
-    <string name="error_message_no_internet">There is no internet connection. Please switch on internet connection and try refreshing again.</string>
+    <string name="error_message_no_internet" tools:keep="@string/error_message_no_internet">There is no internet connection. Please switch on internet connection and try refreshing again.</string>
     <!--Static Release Date text-->
     <string name="showing_reviews_text">Showing reviews below</string>
     <!--Static Release Date text-->
@@ -42,11 +42,13 @@
     <!--Static Rating text-->
     <string name="static_rating_text">Rating</string>
     <!--Extra text to be put in Intent-->
-    <string name="intent_movies">Movies</string>
+    <string name="intent_movies" tools:keep="@string/intent_movies">Movies</string>
     <!--Extra text to be put in Intent-->
     <string name="removed_from_favorites">Movie removed from your favorite list</string>
     <!--Extra text to be put in Intent-->
-    <string name="added_to_favorites">Movie added succesfully to your favorite list</string>
+    <string name="added_to_favorites">Movie added successfully to your favorite list</string>
+    <!--Static text for Share in Detail Activity-->
+    <string name="share_string">Share</string>
     <!--Movie plot read more static text-->
     <string name="movie_plot_read_more_text">Read more</string>
     <!--Movie plot read less static text-->
